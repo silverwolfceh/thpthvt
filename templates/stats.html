@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <title>Quản Lí Thi Đua - Trường THPT Hoàng Văn Thụ</title>
+</head>
+
+<body>
+
+    <header>
+        <h1>Trường THPT Hoàng Văn Thụ</h1>
+        <p>Tiên Học Lễ - Hậu Học Văn</p>
+    </header>
+
+    <section class="rules">
+        <h2 style="color: rgb(56, 24, 197);">Thống kê tuần
+            <button type="button" class="normal-button" onclick="toggleSection('weeklystats', this)">
+                <span class="arrow-up"></span>
+            </button>
+        </h2>
+        <div id="weeklystats">
+            
+            Tuần và lớp cần xét thi đua: 
+            <form method="get" action="">
+                <input type="text" id="weeknum" name="weeknum" value="{{weeknum}}" placeholder="Tuần" maxlength="2">&nbsp;
+                <input type="text" id="lop" name="lop" value="{{lop}}" placeholder="Lớp" maxlength="4">&nbsp;
+                <input type="submit" value="Xem" />
+            </form>
+            <h3>Kết quả thi đua trong tuần: 
+                <button type="button" class="normal-button" onclick="toggleSection('thiduatuan', this)">
+                    <span class="arrow-up"></span>
+                </button>
+            </h3>
+            <ul id="thiduatuan">
+                {% if weeklystats %}
+                    {% for r in weeklystats %}
+                        <li>Tuần {{r[0]}}, Lớp: {{r[1]}}, Điểm trừ: {{r[2]}}, Điểm cộng: {{r[3]}}, Tổng: {{r[4]}}</li>
+                    {% endfor %}
+                {% else %}
+                    <li style="color: red;">Thông tin nhập không hợp lệ</li>
+                {% endif %}
+            </ul>
+            <h3>Danh sách vi phạm:
+                <button type="button" class="normal-button" onclick="toggleSection('hocsinhvp', this)">
+                    <span class="arrow-up"></span>
+                </button>
+            </h3>
+            <ul id="hocsinhvp">
+                {% if weeklydetail %}
+                    {% for r in weeklydetail %}
+                    <li>Học sinh: {{r[0]}}, Lớp: {{r[3]}} - {{r[1]}} - Ngày: {{r[2]}}</li>
+                    {% endfor %}
+                {% else %}
+                <li style="color: red;">Lớp không có vi phạm vào tuần này</li>
+                {% endif %}
+            </ul>
+            <h3>Số lần vi phạm:
+                <button type="button" class="normal-button" onclick="toggleSection('solanvp', this)">
+                    <span class="arrow-up"></span>
+                </button>
+            </h3>
+            <ul id="solanvp">
+                {% if weeklyviotime %}
+                    {% for r in weeklyviotime %}
+                        <li>Học sinh: {{r[0]}}, Lớp: {{r[2]}}, Vi phạm: {{r[1]}} lần</li>
+                    {% endfor %}
+                {% else %}
+                    <li style="color: red;">Lớp không có vi phạm vào tuần này</li>
+                {% endif %}
+            </ul>
+        
+        </div>
+    </section>
+
+    <section class="rules">
+        <h2 style="color: rgb(56, 24, 197);">Thống kê năm 
+            <button type="button" class="normal-button" onclick="toggleSection('yearlystats', this)">
+                <span class="arrow-up"></span>
+            </button>
+        </h2>
+        <div id="yearlystats">
+            <ul>
+                {% for s in yearlystats %}
+                    <li>Nội quy: {{s[1]}} - Số lần: {{s[2]}}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+
+    <div id="icons">
+        <a href="/"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gU3ZnIFZlY3RvciBJY29ucyA6IGh0dHA6Ly93d3cub25saW5ld2ViZm9udHMuY29tL2ljb24gLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPg0KPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMjU2IDI1NiIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMjU2IDI1NiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8bWV0YWRhdGE+IFN2ZyBWZWN0b3IgSWNvbnMgOiBodHRwOi8vd3d3Lm9ubGluZXdlYmZvbnRzLmNvbS9pY29uIDwvbWV0YWRhdGE+DQo8Zz48Zz48cGF0aCBmaWxsPSIjMDAwMDAwIiBkPSJNOTguMiwyNDIuOGMtMC43LDAtMS4yLDAtMS43LDBjLTE0LjcsMC0yOS40LDAtNDQsMGMtNy4zLDAtMTIuMS00LjgtMTIuMS0xMmMwLTM2LjMsMC03Mi42LDAtMTA4LjljMC00LjEsMS41LTcuMyw0LjctOS44YzI1LjEtMjAuMyw1MC4xLTQwLjcsNzUuMi02MWM1LTQuMSwxMC42LTQuMSwxNS42LDBjMjUuMSwyMC4zLDUwLjIsNDAuNyw3NS4zLDYxLjFjMy4xLDIuNSw0LjYsNS42LDQuNiw5LjZjMCwzNi40LDAsNzIuOSwwLDEwOS4zYzAsNi45LTQuOSwxMS44LTExLjgsMTEuOGMtMTQuOSwwLTI5LjcsMC00NC42LDBjLTAuNCwwLTAuOCwwLTEuNSwwYzAtMC43LDAtMS4zLDAtMS45YzAtMjAuNSwwLTQxLjEsMC02MS42YzAtNC42LTIuMi03LjctNi04LjhjLTEtMC4zLTIuMS0wLjQtMy4yLTAuNGMtMTMuNywwLTI3LjQsMC00MS4xLDBjLTUuOSwwLTkuMywzLjQtOS4zLDkuM2MwLDIwLjQsMCw0MC45LDAsNjEuM0M5OC4yLDI0MS40LDk4LjIsMjQyLDk4LjIsMjQyLjh6IE0yNDYsMTA5LjNjLTAuMSwyLjIsMCw0LjQtMC40LDYuNWMtMSw1LjktNi41LDEwLTEyLjcsOS42Yy02LTAuNS0xMC45LTUuNS0xMC44LTExLjVjMC0yLjUtMC44LTMuOS0yLjctNS40Yy0yNy42LTIxLjYtNTUuMS00My4zLTgyLjYtNjVjLTAuNy0wLjUtMS4zLTEuMS0yLTEuNWMtNC45LTMuMi05LjktMy0xNC43LDAuOGMtMTksMTUtMzguMSwzMC01Ny4xLDQ1Yy05LjMsNy40LTE4LjcsMTQuNy0yOCwyMi4xYy0wLjgsMC43LTEuMSwxLjMtMS4xLDIuNGMwLDEuNiwwLDMuMy0wLjUsNC45Yy0xLjUsNS42LTcuMiw5LjItMTIuOCw4LjRjLTYuMS0wLjktMTAuNC01LjctMTAuNS0xMS43YzAtMi44LDAtNS42LDAtOC40YzAtNC4yLDEuNi03LjUsNC45LTEwLjFjMTctMTMuNCwzMy45LTI2LjgsNTAuOS00MC4xQzgwLjksNDMuMSw5NiwzMS4zLDExMSwxOS40YzEwLjYtOC40LDIzLjMtOC4zLDMzLjksMGMzMS45LDI1LjEsNjMuNyw1MC4zLDk1LjYsNzUuM2MzLjcsMi45LDUuNSw2LjQsNS40LDExLjFDMjQ1LjksMTA3LDI0NS45LDEwOC4xLDI0NiwxMDkuM0MyNDUuOSwxMDkuMywyNDYsMTA5LjMsMjQ2LDEwOS4zeiIvPjwvZz48L2c+DQo8L3N2Zz4=" width="32" height="32"></a>
+        <br />
+        <a href="/stats"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gU3ZnIFZlY3RvciBJY29ucyA6IGh0dHA6Ly93d3cub25saW5ld2ViZm9udHMuY29tL2ljb24gLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPg0KPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMjU2IDI1NiIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMjU2IDI1NiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8bWV0YWRhdGE+IFN2ZyBWZWN0b3IgSWNvbnMgOiBodHRwOi8vd3d3Lm9ubGluZXdlYmZvbnRzLmNvbS9pY29uIDwvbWV0YWRhdGE+DQo8Zz48Zz48Zz48cGF0aCBmaWxsPSIjMDAwMDAwIiBkPSJNMjIuMSwzNS4zYy00LjYsMC45LTguNyw0LjMtMTAuOSw4LjlMMTAsNDYuOHY1Ny43djU3LjdsMS4yLDIuNmMyLjMsNC44LDYuOSw4LjMsMTIuMSw5LjFsMiwwLjN2LTQuNWMwLTMuOC0wLjEtNC41LTAuOC00LjVjLTEuNSwwLTMuOS0xLjUtNC45LTNjLTAuOS0xLjUtMC45LTIuMi0wLjktNTcuNWMwLTUzLjQsMC01Ni4xLDAuOC01Ny42YzAuNS0wLjksMS42LTIsMi41LTIuNWMxLjUtMC44LDUuNi0wLjgsMTAwLjktMC44aDk5LjR2LTQuNXYtNC41bC05OS4xLDBDNjguNywzNSwyMy4yLDM1LjEsMjIuMSwzNS4zeiIvPjxwYXRoIGZpbGw9IiMwMDAwMDAiIGQ9Ik0yMzAuOCwzOS4zYzAsMy45LDAuMSw0LjUsMC44LDQuNWMxLjUsMCw0LDEuNyw0LjksMy4zYzAuOCwxLjUsMC44LDQuMiwwLjgsNTcuNGMwLDUzLjIsMCw1NS45LTAuOCw1Ny40Yy0wLjUsMC45LTEuNiwyLTIuNSwyLjVjLTEuNSwwLjgtNS42LDAuOC0xMDEuNCwwLjhIMzIuOHY0LjV2NC41bDEwMC44LTAuMWwxMDAuNy0wLjFsMi42LTEuMmMzLjQtMS42LDYuMy00LjUsNy45LTcuOWwxLjItMi42di01Ny43VjQ2LjhsLTEuMi0yLjZjLTIuMy00LjgtNi45LTguMy0xMi05LjFsLTItMC4zTDIzMC44LDM5LjNMMjMwLjgsMzkuM3oiLz48cGF0aCBmaWxsPSIjMDAwMDAwIiBkPSJNMTY2LjUsNzEuN2MwLDEuNywwLDE4LjIsMCwzNi42czAsMzUuMSwwLDM3LjF2My41aDguNGg4LjR2LTQwLjFWNjguNmgtOC40aC04LjRWNzEuN0wxNjYuNSw3MS43eiIvPjxwYXRoIGZpbGw9IiMwMDAwMDAiIGQ9Ik0xNDMuNSwxMTd2MzEuOWg3LjdoNy43VjExN1Y4NS4xaC03LjdoLTcuN1YxMTd6Ii8+PHBhdGggZmlsbD0iIzAwMDAwMCIgZD0iTTcyLjIsMTIxLjJ2MjcuN2g3LjVoNy41di0yNy43VjkzLjVoLTcuNWgtNy41TDcyLjIsMTIxLjJMNzIuMiwxMjEuMnoiLz48cGF0aCBmaWxsPSIjMDAwMDAwIiBkPSJNMTIwLDEyNS40djIzLjVoNy43aDcuN3YtMjMuNVYxMDJoLTcuN0gxMjBWMTI1LjR6Ii8+PHBhdGggZmlsbD0iIzAwMDAwMCIgZD0iTTk1LjYsMTI5LjR2MTkuNWg3LjVoNy41di0xOS41di0xOS41aC03LjVoLTcuNVYxMjkuNEw5NS42LDEyOS40eiIvPjxwYXRoIGZpbGw9IiMwMDAwMDAiIGQ9Ik0xOTEuOCwxMjkuNHYxOS41aDcuN2g3Ljd2LTE5LjV2LTE5LjVoLTcuN2gtNy43VjEyOS40eiIvPjxwYXRoIGZpbGw9IiMwMDAwMDAiIGQ9Ik00Ny44LDEzNi40djEyLjRoNy43aDcuN3YtMTIuNFYxMjRoLTcuN2gtNy43VjEzNi40TDQ3LjgsMTM2LjR6Ii8+PHBhdGggZmlsbD0iIzAwMDAwMCIgZD0iTTExNC40LDE5NnYxNC44aC05LjljLTguMywwLTEwLjIsMC4xLTExLjUsMC44Yy0zLjUsMS42LTMuNyw2LjYtMC41LDguNmMxLjUsMC45LDIuNiwwLjksMzUuNCwwLjljMjkuNywwLDM0LjItMC4xLDM1LjUtMC43YzMuNy0xLjgsMy42LTctMC4zLTljLTAuOC0wLjQtNC4yLTAuNi0xMS41LTAuNmgtMTAuNVYxOTZ2LTE0LjhoLTEzLjRoLTEzLjRWMTk2eiIvPjwvZz48L2c+PC9nPg0KPC9zdmc+" width="32" height="32"></a>
+      </div>
+</body>
+
+</html>

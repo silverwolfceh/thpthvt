@@ -1,0 +1,7 @@
+{
+    "MYSQL_DB": "quanli_hs",
+    "MYSQL_HOST": "127.0.0.1",
+    "MYSQL_PASS": "root",
+    "MYSQL_PORT": "3306",
+    "MYSQL_USER": "root"
+}

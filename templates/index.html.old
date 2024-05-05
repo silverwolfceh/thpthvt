@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trường THPT Hoàng Văn Thụ</title>
+    <style>
+        /* Add CSS styling here */
+        .container {
+            margin: 20px auto; /* Center the container horizontally */
+            border: 1px solid #ccc;
+            padding: 20px;
+            text-align: center; /* Center text inside the container */
+        }
+        .section {
+            margin-bottom: 20px;
+            text-align: left; /* Align text to the left within the section */
+        }
+        .bottom-section {
+            margin-top: 20px;
+            text-align: center;
+            font-style: italic;
+        }
+        .hide {
+            display: none; /* Initially hide the section */
+        }
+        .arrow-btn::after {
+            margin-left: 5px;
+            display: inline-block;
+            font-size: 0.8em; /* Adjust arrow size */
+            /*content: '\25BC'; /* Unicode character for down arrow */
+        }
+        .arrow-btn.hide::after {
+            content: '\25B2'; /* Unicode character for up arrow */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- First section: School name and slogan -->
+        <div class="section" style="text-align: center;">
+            <h1>Trường THPT Hoàng Văn Thụ</h1>
+            <p>Tiên Học Lễ - Hậu Học Văn</p>
+        </div>
+        
+        <!-- Second section: List of rules -->
+        <div class="section" id="section2">
+            <h2 onclick="toggleSection('rules')">Nội quy:<span class="arrow-btn"></span></h2>
+            <table border="1" id="rules" class="hide">
+                <tr><th>Mã nội quy</th><th>Nội dung</th><th>Điểm trừ</th><th>Điểm cộng</th></tr>
+                {% for rule in rules %}
+                    <tr><td>{{rule[0]}}</td><td>{{rule[1]}}</td><td>{{rule[2]}}</td><td>{{rule[3]}}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- Last section: Bottom text -->
+        <div class="bottom-section">
+            <p>{{ bottom_text }}</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleSection(sectionId) {
+            var section = document.getElementById(sectionId);
+            var arrow = document.getElementsByClassName('arrow-btn')[0];
+            if (section.classList.contains('hide')) {
+                section.classList.remove('hide');
+                arrow.style.content = "";
+                arrow.innerHTML = '▲'; // Unicode character for up arrow
+            } else {
+                section.classList.add('hide');
+                arrow.innerHTML = '▼'; // Unicode character for down arrow
+                arrow.style.content = "";
+            }
+        }
+    </script>
+</body>
+</html>
